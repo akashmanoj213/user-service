@@ -9,13 +9,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
   imports: [UsersModule, TypeOrmModule.forRoot({
     type: 'postgres',
-    // host: '/cloudsql/pruinhlth-nprd-dev-scxlyx-7250:asia-south1:sahi-dev',
-    host: 'localhost',
+    host: '/cloudsql/pruinhlth-nprd-dev-scxlyx-7250:asia-south1:sahi-dev',
+    // host: 'localhost',
     port: 5432,
-    // username: 'sahi-user',
-    // password: 'qwerty',
-    username: 'postgres',
+    username: 'sahi-user',
     password: 'qwerty',
+    // username: 'postgres',
+    // password: 'qwerty',
     database: 'Users',
     entities: [User, Address],
     synchronize: true
