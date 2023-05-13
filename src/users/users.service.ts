@@ -99,7 +99,7 @@ export class UsersService {
 
     const result = await this.userRepository.save(existingUser);
 
-    return existingUser;
+    return result;
   }
 
   async findAll() {
