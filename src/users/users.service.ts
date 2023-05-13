@@ -93,7 +93,7 @@ export class UsersService {
       ...pincode && { pincode },
       ...mobileNumber && { mobileNumber },
       ...email && { email },
-      ...isKycVerified && { isKycVerified },
+      ...(isKycVerified !== undefined) && { isKycVerified },
       ...addresses && { addresses }
     }
 
