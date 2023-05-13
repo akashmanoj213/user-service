@@ -62,14 +62,14 @@ export class UsersService {
   }
 
   async update(id, createOrUpdateUserDto: CreateOrUpdateUserDto) {
-    const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses } = createOrUpdateUserDto;
+    const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses: newAddresses } = createOrUpdateUserDto;
 
     let existingUser: User = await this.userRepository.findOneByOrFail({ id });
 
-    let newAddresses;
+    let addresses: Array<Address>;
 
-    if (addresses && addresses.length > 0) {
-      newAddresses = addresses.map(address => {
+    if (newAddresses && newAddresses.length > 0) {
+      addresses = newAddresses.map(address => {
         const { id, streetAddress1, streetAddress2, type, city, state, pincode } = address;
 
         return {
@@ -94,7 +94,7 @@ export class UsersService {
       ...mobileNumber && { mobileNumber },
       ...email && { email },
       ...isKycVerified && { isKycVerified },
-      ...newAddresses && { newAddresses }
+      ...addresses && { addresses }
     }
 
     await this.userRepository.save(existingUser);
