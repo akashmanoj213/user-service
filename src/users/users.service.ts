@@ -16,33 +16,33 @@ export class UsersService {
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
     private firestoreService: FirestoreService
-  ) {}
-  
+  ) { }
+
   async create(createOrUpdateUserDto: CreateOrUpdateUserDto) {
-    const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses = [] } = createOrUpdateUserDto;
+    const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses } = createOrUpdateUserDto;
 
     const existingUser: User = await this.userRepository.findOneBy({ mobileNumber });
 
-    if(existingUser) {
+    if (existingUser) {
       throw new Error(`mobileNuber: ${mobileNumber} is already in use for userid: ${existingUser.id} !}`)
     }
 
-    let newAddresses: Array<Address> = [];
+    let newAddresses;
 
-    addresses.forEach(address => {
-      const {streetAddress1, streetAddress2, type, city, state, pincode } = address;
+    if (addresses && addresses.length > 0) {
+      newAddresses = addresses.map(address => {
+        const { streetAddress1, streetAddress2, type, city, state, pincode } = address;
 
-      const newAddress = {
-        streetAddress1,
-        streetAddress2,
-        city,
-        state,
-        pincode,
-        type
-      }
-
-      newAddresses.push(newAddress);
-    })
+        return {
+          streetAddress1,
+          streetAddress2,
+          city,
+          state,
+          pincode,
+          type
+        };
+      });
+    }
 
     const user: User = {
       firstName,
@@ -62,39 +62,39 @@ export class UsersService {
   }
 
   async update(id, createOrUpdateUserDto: CreateOrUpdateUserDto) {
-    const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses = [] } = createOrUpdateUserDto;
+    const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses } = createOrUpdateUserDto;
 
     let existingUser: User = await this.userRepository.findOneByOrFail({ id });
 
-    let newAddresses: Array<Address> = [];
+    let newAddresses;
 
-    addresses.forEach(address => {
-      const {id, streetAddress1, streetAddress2, type, city, state, pincode } = address;
+    if (addresses && addresses.length > 0) {
+      newAddresses = addresses.map(address => {
+        const { id, streetAddress1, streetAddress2, type, city, state, pincode } = address;
 
-      const newAddress = {
-        id,
-        streetAddress1,
-        streetAddress2,
-        city,
-        state,
-        pincode,
-        type
-      }
-
-      newAddresses.push(newAddress);
-    })
+        return {
+          id,
+          streetAddress1,
+          streetAddress2,
+          city,
+          state,
+          pincode,
+          type
+        };
+      });
+    }
 
     existingUser = {
       ...existingUser,
-      firstName,
-      lastName,
-      gender,
-      dob,
-      pincode,
-      mobileNumber,
-      email,
-      isKycVerified,
-      addresses: newAddresses
+      ...firstName && { firstName },
+      ...lastName && { lastName },
+      ...gender && { gender },
+      ...dob && { dob },
+      ...pincode && { pincode },
+      ...mobileNumber && { mobileNumber },
+      ...email && { email },
+      ...isKycVerified && { isKycVerified },
+      ...newAddresses && { newAddresses }
     }
 
     await this.userRepository.save(existingUser);
