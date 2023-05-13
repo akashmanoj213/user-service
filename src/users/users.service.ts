@@ -56,7 +56,7 @@ export class UsersService {
       addresses: newAddresses
     }
 
-    const result = await this.userRepository.save(user);
+    await this.userRepository.save(user);
 
     return user;
   }
@@ -97,9 +97,9 @@ export class UsersService {
       addresses: newAddresses
     }
 
-    const result = await this.userRepository.save(existingUser);
+    await this.userRepository.save(existingUser);
 
-    return result;
+    return existingUser;
   }
 
   async findAll() {
