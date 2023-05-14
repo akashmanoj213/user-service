@@ -1,13 +1,16 @@
 import { Controller, Get, Post, Body, Param, Delete, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateOrUpdateUserDto } from './dto/create-update-user.dto';
+import { PubSubEvent } from './dto/pub-sub-event.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post('event-handler')
-  async userChangeEventHandler(@Body() createOrUpdateUserDto: CreateOrUpdateUserDto) {
+  async userChangeEventHandler(@Body() event: PubSubEvent) {
+    const { message: { data } } = event;
+    const createOrUpdateUserDto: CreateOrUpdateUserDto = this.formatMessageData(data);
     const { id, mobileNumber } = createOrUpdateUserDto;
 
     let result: CreateOrUpdateUserDto;
@@ -46,5 +49,13 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  formatMessageData(data: string): CreateOrUpdateUserDto {
+    const bufferObj = Buffer.from(data, "base64");
+    const decodedData = bufferObj.toString("utf8");
+    const jsonObj = JSON.parse(decodedData);
+
+    return jsonObj;
   }
 }
