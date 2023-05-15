@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Address } from './entities/address.entity';
 import { FirestoreService } from 'src/providers/firestore/firestore.service';
+import { DateTime } from "luxon";
 
 @Injectable()
 export class UsersService {
@@ -21,10 +22,15 @@ export class UsersService {
   async create(createOrUpdateUserDto: CreateOrUpdateUserDto) {
     const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses } = createOrUpdateUserDto;
 
+    const dateOfBirth = DateTime.fromISO(dob); 
+    if(dateOfBirth.invalid) {
+      throw new Error(dateOfBirth.invalid.explanation);
+    }
+
     const existingUser: User = await this.userRepository.findOneBy({ mobileNumber });
 
     if (existingUser) {
-      throw new Error(`mobileNuber: ${mobileNumber} is already in use for userid: ${existingUser.id} !}`)
+      throw new Error(`mobileNuber: ${mobileNumber} is already in use for userid: ${existingUser.id}!}`)
     }
 
     let newAddresses;
@@ -48,7 +54,7 @@ export class UsersService {
       firstName,
       lastName,
       gender,
-      dob,
+      dob: dateOfBirth.toSQLDate(),
       pincode,
       mobileNumber,
       email,
@@ -58,13 +64,16 @@ export class UsersService {
 
     await this.userRepository.save(user);
 
-    console.log("User: ", user);
-
     return user;
   }
 
   async update(id, createOrUpdateUserDto: CreateOrUpdateUserDto) {
     const { firstName, lastName, gender, dob, pincode, mobileNumber, email, isKycVerified, addresses: newAddresses } = createOrUpdateUserDto;
+
+    const dateOfBirth = DateTime.fromISO(dob);
+    if(dateOfBirth.invalid) {
+      throw new Error(dateOfBirth.invalid.explanation);
+    }
 
     let existingUser: User = await this.userRepository.findOneByOrFail({ id });
 
@@ -86,14 +95,12 @@ export class UsersService {
       });
     }
 
-    console.log("Existing user", existingUser);
-
     existingUser = {
       ...existingUser,
       ...firstName && { firstName },
       ...lastName && { lastName },
       ...gender && { gender },
-      ...dob && { dob },
+      ...dateOfBirth && { dob: dateOfBirth.toSQLDate() },
       ...pincode && { pincode },
       ...mobileNumber && { mobileNumber },
       ...email && { email },
