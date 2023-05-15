@@ -58,6 +58,8 @@ export class UsersService {
 
     await this.userRepository.save(user);
 
+    console.log("User: ", user);
+
     return user;
   }
 
@@ -83,6 +85,8 @@ export class UsersService {
         };
       });
     }
+
+    console.log("Existing user", existingUser);
 
     existingUser = {
       ...existingUser,
@@ -120,6 +124,7 @@ export class UsersService {
   }
 
   async syncQueryDatabase(userId: number, user: CreateOrUpdateUserDto) {
+    console.log("Firestore user", user);
     return await this.firestoreService.createOrUpdate<CreateOrUpdateUserDto>(this.USERS_COLLECTION, userId, user);
   }
 }
