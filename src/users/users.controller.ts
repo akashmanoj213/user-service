@@ -9,8 +9,11 @@ export class UsersController {
 
   @Post('event-handler')
   async userChangeEventHandler(@Body() event: PubSubEvent) {
+    console.log("event", event);
     const { message: { data } } = event;
     const createOrUpdateUserDto: CreateOrUpdateUserDto = this.formatMessageData(data);
+    console.log("DTO", createOrUpdateUserDto);
+
     const { id, mobileNumber } = createOrUpdateUserDto;
 
     let result: CreateOrUpdateUserDto;
@@ -30,6 +33,7 @@ export class UsersController {
       // TO DO: handle error and resync database.
       await this.usersService.syncQueryDatabase(result.id, result);
     } catch (error) {
+      console.log("Error", error.message);
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
